@@ -1,0 +1,34 @@
+{
+  "uuid": "9f257f37-f5a6-4d22-b4bb-49844219d2ee",
+  "shortName": "thingbroker-pebble",
+  "longName": "Thingbroker Pebble",
+  "companyName": "HCT LAB",
+  "versionCode": 1,
+  "versionLabel": "0.1.0",
+  "capabilities": [ "configurable" ],
+  "watchapp": {
+    "watchface": true
+  },
+  "appKeys": {
+    "thingbrokerurl": 0
+  },
+  "resources": {
+    "media": [
+       {
+          "type": "png",
+          "name": "IMAGE_0",
+          "file": "images/0.png"
+       },
+       {
+          "type": "png",
+          "name": "IMAGE_1",
+          "file": "images/1.png"
+       },
+       {
+          "type": "png",
+          "name": "IMAGE_2",
+          "file": "images/2.png"
+       }
+    ]
+  }
+}
