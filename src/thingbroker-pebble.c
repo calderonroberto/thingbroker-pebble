@@ -16,10 +16,8 @@ static int seconds_counter = 0;
 //TODO: Cleaner. With an uninitialized larger buffer
 //static char thingbrokerurl_text[128];
 //static char thingid_text[128];
-static char* thingbrokerurl_text = "http://kimberly.magic.ubc.ca:8080/thingbroker                  ";
-static char* thingid_text = "demohighfives                         ";
-
-//static int image_id = 0;
+static char *thingbrokerurl_text = "http://kimberly.magic.ubc.ca:8080/thingbroker                  ";
+static char *thingid_text = "demohighfives                         ";
 
 enum {
    CONF_THINGBROKERURL = 0,
