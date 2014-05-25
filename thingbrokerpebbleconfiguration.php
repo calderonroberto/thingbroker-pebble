@@ -19,6 +19,9 @@
         <div data-role="fieldcontain">
           <label for="thingbrokerurl">Thingbroker URL:</label>
           <textarea maxlength="100" cols="10" rows="1" name="thingbrokerurl" id="thingbrokerurl"><?php echo isset($_GET['thingbrokerurl']) ? $_GET['thingbrokerurl'] : 'http://kimberly.magic.ubc.ca:8080/thingbroker'; ?></textarea>
+          <label for="thingbrokerurl">Thing Id:</label>
+          <textarea maxlength="100" cols="10" rows="1" name="thingid" id="thingid"><?php echo isset($_GET['thingid']) ? $_GET['thingid'] : 'pebble'; ?></textarea>
+
         </div>
 
         <div class="ui-body ui-body-b">
@@ -34,6 +37,7 @@
       function saveOptions() {
         var options = {
           'thingbrokerurl': $("#thingbrokerurl").val(),
+          'thingid': $("#thingid").val(),
         }
         return options;
       }

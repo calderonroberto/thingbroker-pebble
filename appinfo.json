@@ -10,7 +10,8 @@
     "watchface": true
   },
   "appKeys": {
-    "thingbrokerurl": 0
+    "thingbrokerurl": 0,
+    "thingid": 1
   },
   "resources": {
     "media": [

@@ -13,10 +13,17 @@ static GBitmap *image0;
 static BitmapLayer *image_layer;
 static int seconds_counter = 0;
 
+//TODO: Cleaner. With an uninitialized larger buffer
+//static char thingbrokerurl_text[128];
+//static char thingid_text[128];
+static char* thingbrokerurl_text = "http://kimberly.magic.ubc.ca:8080/thingbroker                  ";
+static char* thingid_text = "demohighfives                         ";
+
 //static int image_id = 0;
 
 enum {
-   CONF_THINGBROKERURL = 0
+   CONF_THINGBROKERURL = 0,
+   CONF_THINGID = 1
 };
 
 /************ Custom functions ************/
@@ -45,29 +52,28 @@ void handle_image (int id) {
 /************ Time, Accel, Battery and Bluetooth handlers ************/
 
 void accel_tap_handler(AccelAxisType axis, int32_t direction) {
-  
-  char* thingbrokerurl_text =  "http://kimberly.magic.ubc.ca:8080/thingbroker";
-  if ( axis == ACCEL_AXIS_Z || axis == ACCEL_AXIS_X ) {
-    if ( persist_exists(CONF_THINGBROKERURL) ){
-      //persist_read_string(CONF_THINGBROKERURL, thingbrokerurl_text, sizeof(thingbrokerurl_text));
-      persist_read_string(CONF_THINGBROKERURL, thingbrokerurl_text, 64); //sizeof returns 4, will dig in later to find out why
-      
-      //APP_LOG(APP_LOG_LEVEL_DEBUG, "Size of buffer: %d", sizeof(thingbrokerurl_text) );
-      //APP_LOG(APP_LOG_LEVEL_DEBUG, "ThingBroker URL stored size: %d", persist_get_size(CONF_THINGBROKERURL) );
-      //APP_LOG(APP_LOG_LEVEL_DEBUG, "ThingBroker URL stored: %s", thingbrokerurl_text );
+ 
+  //if ( axis == ACCEL_AXIS_Z || axis == ACCEL_AXIS_X ) { //disabled, we'll take everything
+
+      APP_LOG(APP_LOG_LEVEL_DEBUG, ">>> Sending Message to phone");
+      APP_LOG(APP_LOG_LEVEL_DEBUG, "url: %s", thingbrokerurl_text );
+      APP_LOG(APP_LOG_LEVEL_DEBUG, "id: %s", thingid_text );
 
       DictionaryIterator *iter;
       app_message_outbox_begin(&iter);
-      Tuplet value = TupletCString(CONF_THINGBROKERURL, thingbrokerurl_text);
-      //Tuplet value = TupletInteger(1, 42);      
-      dict_write_tuplet(iter, &value);
+      Tuplet url_value = TupletCString(CONF_THINGBROKERURL, thingbrokerurl_text);
+      Tuplet id_value = TupletCString(CONF_THINGID, thingid_text);
+      DictionaryResult url = dict_write_tuplet(iter, &url_value);
+      DictionaryResult id = dict_write_tuplet(iter, &id_value);
+
+      dict_write_end(iter);
+
       app_message_outbox_send();
 
       handle_image(1);
       seconds_counter = 0;
-    }
-  }
 
+  //} //disabled, we'll take everything
 }
 
 static void handle_bluetooth(bool connected) {
@@ -133,30 +139,63 @@ void update_face () {
 
 /************ Communication Handlers ************/
 
+char *translate_error(AppMessageResult result) {
+  switch (result) {
+    case APP_MSG_OK: return "APP_MSG_OK";
+    case APP_MSG_SEND_TIMEOUT: return "APP_MSG_SEND_TIMEOUT";
+    case APP_MSG_SEND_REJECTED: return "APP_MSG_SEND_REJECTED";
+    case APP_MSG_NOT_CONNECTED: return "APP_MSG_NOT_CONNECTED";
+    case APP_MSG_APP_NOT_RUNNING: return "APP_MSG_APP_NOT_RUNNING";
+    case APP_MSG_INVALID_ARGS: return "APP_MSG_INVALID_ARGS";
+    case APP_MSG_BUSY: return "APP_MSG_BUSY";
+    case APP_MSG_BUFFER_OVERFLOW: return "APP_MSG_BUFFER_OVERFLOW";
+    case APP_MSG_ALREADY_RELEASED: return "APP_MSG_ALREADY_RELEASED";
+    case APP_MSG_CALLBACK_ALREADY_REGISTERED: return "APP_MSG_CALLBACK_ALREADY_REGISTERED";
+    case APP_MSG_CALLBACK_NOT_REGISTERED: return "APP_MSG_CALLBACK_NOT_REGISTERED";
+    case APP_MSG_OUT_OF_MEMORY: return "APP_MSG_OUT_OF_MEMORY";
+    case APP_MSG_CLOSED: return "APP_MSG_CLOSED";
+    case APP_MSG_INTERNAL_ERROR: return "APP_MSG_INTERNAL_ERROR";
+    default: return "UNKNOWN ERROR";
+  }
+}
+
 void out_sent_handler(DictionaryIterator *sent, void *context) {
-  // outgoing message was delivered
+  APP_LOG(APP_LOG_LEVEL_DEBUG, ">>> outgoing message was delivered");
 }
 
 void out_failed_handler(DictionaryIterator *failed, AppMessageResult reason, void *context) {
-  // outgoing message failed
+  APP_LOG(APP_LOG_LEVEL_DEBUG, ">>> outgoing message failed");
 }
 
 void in_received_handler(DictionaryIterator *received, void *context) {
   // incoming message received
+  APP_LOG(APP_LOG_LEVEL_DEBUG, ">>> Received Message from Phone");
   APP_LOG(APP_LOG_LEVEL_DEBUG, "CONF_thingbrokerurl EXISTS %d", persist_exists(CONF_THINGBROKERURL) );
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "CONF_thingid EXISTS %d", persist_exists(CONF_THINGID) );
 
   Tuple *thingbrokerurl_tuple = dict_find(received, CONF_THINGBROKERURL);
   if (thingbrokerurl_tuple) {
-    char* value = thingbrokerurl_tuple->value->cstring;
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "ThingBroker URL received from phone: %s", value);
-    persist_write_string(CONF_THINGBROKERURL, value);
+    char* value_url = thingbrokerurl_tuple->value->cstring;
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "ThingBroker URL received from phone: %s", value_url);
+    persist_write_string(CONF_THINGBROKERURL, value_url);
+    thingbrokerurl_text = value_url;
   }
+
+  Tuple *thingid_tuple = dict_find(received, CONF_THINGID);
+  if (thingid_tuple) {
+    char* value_id = thingid_tuple->value->cstring;
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "ThingBroker ID received from phone: %s", value_id);
+    persist_write_string(CONF_THINGID, value_id);
+    thingid_text = value_id;
+  }
+
   update_face();
 }
 
 void in_dropped_handler(AppMessageResult reason, void *context) {
-  // incoming message dropped
+  APP_LOG(APP_LOG_LEVEL_DEBUG, ">>> incoming message dropped %s", translate_error(reason));
 }
+
 
 
 /************ App initialization and finalization ************/
@@ -219,9 +258,19 @@ static void window_load(Window *window) {
   app_message_register_inbox_dropped(in_dropped_handler);
   app_message_register_outbox_sent(out_sent_handler);
   app_message_register_outbox_failed(out_failed_handler);
-  const uint32_t inbound_size = 64;
-  const uint32_t outbound_size = 64;
+  const uint32_t inbound_size = 256;
+  const uint32_t outbound_size = 256;
   app_message_open(inbound_size, outbound_size);
+
+  //load configuration
+  if ( persist_exists(CONF_THINGBROKERURL) && persist_exists(CONF_THINGID) ){
+     //TODO: when the buffer is empty (spaces, or undefined) persist_read_string corrupts the string; i'm doing something wrong.
+     persist_read_string(CONF_THINGBROKERURL, thingbrokerurl_text, 128);
+     persist_read_string(CONF_THINGID, thingid_text, 128);
+     APP_LOG(APP_LOG_LEVEL_DEBUG, ">>> Read configuration");
+     APP_LOG(APP_LOG_LEVEL_DEBUG, "url: %s", thingbrokerurl_text );
+     APP_LOG(APP_LOG_LEVEL_DEBUG, "id: %s", thingid_text );
+  }
 
   update_face();
 }

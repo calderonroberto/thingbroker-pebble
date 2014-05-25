@@ -8,15 +8,18 @@ Pebble.addEventListener("ready", function() {
 
 Pebble.addEventListener("appmessage",
   function(e) {
-    console.log("Received message: " + e.payload);
+    console.log(">>> JS Received message: " + e.payload);
     var o = JSON.stringify(e.payload);
     console.log("Source: " + o);
     
-    var thingbrokerurl = e.payload.thingbrokerurl;    
+    var thingbrokerurl = e.payload.thingbrokerurl;   
+    var thingid = e.payload.thingid; 
     console.log(thingbrokerurl);
+    console.log(thingid);
 
+    console.log(">>> Posting Event to " + thingbrokerurl + "/things/" + thingid + "/events");
     var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 
-    xmlhttp.open("POST", thingbrokerurl + "/things/containercheckins/events");
+    xmlhttp.open("POST", thingbrokerurl + "/things/" + thingid + "/events");
     xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xmlhttp.send(JSON.stringify({thing:"pebble", gesture:"highfive"}));
 
