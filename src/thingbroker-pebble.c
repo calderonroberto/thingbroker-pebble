@@ -17,7 +17,7 @@ static int seconds_counter = 0;
 //static char thingbrokerurl_text[128];
 //static char thingid_text[128];
 static char *thingbrokerurl_text = "http://kimberly.magic.ubc.ca:8080/thingbroker                  ";
-static char *thingid_text = "demohighfives                         ";
+static char *thingid_text = "checkin1396992920                         ";
 
 enum {
    CONF_THINGBROKERURL = 0,
@@ -66,7 +66,7 @@ void accel_tap_handler(AccelAxisType axis, int32_t direction) {
 
       dict_write_end(iter);
 
-      app_message_outbox_send();
+      app_message_outbox_send(); //TODO: clear cache? Data is corrupted after a bit, maybe lack of memory?
 
       handle_image(1);
       seconds_counter = 0;

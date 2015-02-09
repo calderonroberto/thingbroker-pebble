@@ -4,7 +4,7 @@
   "longName": "Thingbroker Pebble",
   "companyName": "HCT LAB",
   "versionCode": 1,
-  "versionLabel": "0.1.0",
+  "versionLabel": "1.0",
   "capabilities": [ "configurable" ],
   "watchapp": {
     "watchface": true

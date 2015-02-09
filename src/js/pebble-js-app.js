@@ -12,8 +12,11 @@ Pebble.addEventListener("appmessage",
     var o = JSON.stringify(e.payload);
     console.log("Source: " + o);
     
-    var thingbrokerurl = e.payload.thingbrokerurl;   
-    var thingid = e.payload.thingid; 
+    //var thingbrokerurl = e.payload.thingbrokerurl;  TODO: check why it gets corrupted after a bit
+    //var thingid = e.payload.thingid; 
+    var thingbrokerurl = "http://kimberly.magic.ubc.ca:8080/thingbroker" 
+    var thingid = "checkin1396992920"
+
     console.log(thingbrokerurl);
     console.log(thingid);
 
